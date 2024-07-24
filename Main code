@@ -1,0 +1,104 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+# Mount Google Drive
+
+
+# Load CSV files into DataFrames
+df1 = pd.read_excel('Entertainer - Basic Info.xlsx')
+df2 = pd.read_excel('Entertainer - Breakthrough Info.xlsx')
+df3 = pd.read_excel('Entertainer - Last work Info.xlsx')
+
+# Inspect the DataFrames
+print(df1.head())
+print(df2.head())
+print(df3.head())
+
+print("df1 columns:", df1.columns)
+print("df2 columns:", df2.columns)
+print("df3 columns:", df3.columns)
+
+# Merge DataFrames on a common column
+merged_df = pd.merge(df1, df2, on='Entertainer')
+merged_df = pd.merge(merged_df, df3, on='Entertainer')
+
+# Create calculated columns
+merged_df['Age at First Breakthrough'] = merged_df['Year of Breakthrough/#1 Hit/Award Nomination'] - merged_df['Birth Year']
+merged_df['Age at First Oscar'] = merged_df['Year of First Oscar/Grammy/Emmy'] - merged_df['Birth Year']
+merged_df['Age at Last Major Work'] = merged_df['Year of Last Major Work (arguable)'] - merged_df['Birth Year']
+merged_df['Career Span'] = merged_df['Year of First Oscar/Grammy/Emmy'] - merged_df['Year of Breakthrough/#1 Hit/Award Nomination']
+merged_df['Lifespan'] = merged_df['Year of Death'] - merged_df['Birth Year']
+merged_df['Age at Death'] = merged_df['Year of Death'] - merged_df['Birth Year']
+
+# Perform group by and aggregation
+breakthrough_trends = merged_df.groupby('Year of Breakthrough/#1 Hit/Award Nomination').size()
+oscar_trends = merged_df.groupby('Year of First Oscar/Grammy/Emmy').size()
+last_major_work_trends = merged_df.groupby('Year of First Oscar/Grammy/Emmy').size()
+death_trends = merged_df.groupby('Year of Death').size()
+
+sns.set(style="whitegrid")
+-
+# Create subplots
+fig, axs = plt.subplots(2, 2, figsize=(18, 12))
+
+# Breakthrough trends (Bar chart)
+axs[0, 0].bar(breakthrough_trends.index, breakthrough_trends.values, color='blue')
+axs[0, 0].set_title('Breakthrough Trends by Year')
+axs[0, 0].set_xlabel('Year of Breakthrough')
+axs[0, 0].set_ylabel('Number of Entertainers')
+axs[0, 0].tick_params(axis='x', rotation=45)
+axs[0, 0].grid(True)
+
+# Oscar trends (Line chart)
+axs[0, 1].plot(oscar_trends.index, oscar_trends.values, marker='o', linestyle='-', color='green')
+axs[0, 1].set_title('Oscar Trends by Year')
+axs[0, 1].set_xlabel('Year of First Oscar')
+axs[0, 1].set_ylabel('Number of Entertainers')
+axs[0, 1].tick_params(axis='x', rotation=45)
+axs[0, 1].grid(True)
+
+# Last major work trends (Bar chart)
+axs[1, 0].bar(last_major_work_trends.index, last_major_work_trends.values, color='red')
+axs[1, 0].set_title('Last Major Work Trends by Year')
+axs[1, 0].set_xlabel('Year of Last Major Work')
+axs[1, 0].set_ylabel('Number of Entertainers')
+axs[1, 0].tick_params(axis='x', rotation=45)
+axs[1, 0].grid(True)
+
+# Death trends (Line chart)
+axs[1, 1].plot(death_trends.index, death_trends.values, marker='o', linestyle='-', color='purple')
+axs[1, 1].set_title('Death Trends by Year')
+axs[1, 1].set_xlabel('Year of Death')
+axs[1, 1].set_ylabel('Number of Entertainers')
+axs[1, 1].tick_params(axis='x', rotation=45)
+axs[1, 1].grid(True)
+
+# Adjust layout
+plt.tight_layout()
+
+# Show the plots
+plt.show()
+
+
+
+sns.set(style="whitegrid")
+
+# Create a bar chart for career spans
+plt.figure(figsize=(14, 8))
+plt.barh(merged_df['Entertainer'], merged_df['Career Span'], color='skyblue')
+plt.title('Career Span of Each Entertainer')
+plt.xlabel('Career Span (Years)')
+plt.ylabel('Entertainer')
+plt.tight_layout()
+plt.show()
+
+
+plt.figure(figsize=(14, 8))
+plt.barh(merged_df['Entertainer'], merged_df['Lifespan'], color='lightcoral')
+plt.title('Lifespan of Each Entertainer')
+plt.xlabel('Lifespan (Years)')
+plt.ylabel('Entertainer')
+plt.tight_layout()
+plt.show()
